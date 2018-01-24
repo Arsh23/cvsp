@@ -61,7 +61,7 @@ function init_pixel(id, x, y, size, linewidth) {
         .attr('y', y+linewidth)
         .attr('width', size-(2*linewidth))
         .attr('height', size-(2*linewidth))
-        .attr("xlink:href", "testimage.png")
+        .attr("xlink:href", "testimage5.jpg")
         .style('opacity', 0.60)
         .style('filter', 'url(#bw-filter)')
 
@@ -71,7 +71,7 @@ function init_pixel(id, x, y, size, linewidth) {
         .attr('y', y+linewidth)
         .attr('width', size-(2*linewidth))
         .attr('height', size-(2*linewidth))
-        .attr("xlink:href", "testimage.png")
+        .attr("xlink:href", "testimage5.jpg")
         .attr("clip-path", 'url(#clipPath' + id + ')')
 }
 
