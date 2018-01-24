@@ -3,6 +3,7 @@ var basewidth = $('.graph').width()
 var baseheight = $(window).height();
 // var basewidth = 1500;
 // var baseheight = 500;
+
 var margin = {
             top: 50,
             right: 30,
@@ -28,7 +29,9 @@ defs.append("filter")
     .attr('values', '0')
 
 function init_pixel(id, x, y, size, linewidth, image, offsetX, offsetY, imgsize) {
-    var path = `M ${x},${y} l${size},0 l0,${size} l${-size},0 Z`
+    var s = size-(2*linewidth)
+    var path = `M ${x+linewidth},${y+linewidth} l${s},0 l0,${s} l${-s},0 Z`
+    var clippath = `M ${x},${y} l${size},0 l0,${size} l${-size},0 Z`
     var length = 4*size
 
     pixel = canvas.append('g')
@@ -45,11 +48,10 @@ function init_pixel(id, x, y, size, linewidth, image, offsetX, offsetY, imgsize)
         .attr("id", "clipPathCrop"+id)
         .append("path")
         .attr('id', 'imgCropClip'+id)
-        .attr("d", path)
+        .attr("d", clippath)
         .style('fill', 'none')
         .style('stroke', 'black')
     
-    // var imgsize = (size-(2*linewidth) )*2
     pixel.append("svg:image")
         .attr('id', 'bgimage'+id)
         .attr('x', x+offsetX)
@@ -57,14 +59,15 @@ function init_pixel(id, x, y, size, linewidth, image, offsetX, offsetY, imgsize)
         .attr('width', imgsize)
         .attr('height', imgsize)
         .attr("xlink:href", image)
-        .style('opacity', 0.60)
+        .style('stroke', 'black')
+        .style('opacity', 0.20)
         .style('filter', 'url(#bw-filter)')
         .attr("clip-path", 'url(#clipPathCrop' + id + ')')
 
     pixel.append("svg:image")
         .attr('id', 'image'+id)
-        .attr('x', x+linewidth+offsetX)
-        .attr('y', y+linewidth+offsetY)
+        .attr('x', x+offsetX)
+        .attr('y', y+offsetY)
         .attr('width', imgsize)
         .attr('height', imgsize)
         .attr("xlink:href", image)
@@ -91,12 +94,18 @@ function load_pixel(id, init_delay, delay) {
         .duration(delay)
         .delay(init_delay)
         .attr('stroke-dashoffset', 0)
+        .transition()
+        .duration(0)
+        .attr('d', '')
+    canvas.select('#bgimage'+id)
+        .transition()
+        .duration(delay)
+        .ease(d3.easeLinear)
+        .delay(init_delay)
+        .style('opacity', 0.7)
 }
 
 function render_pixel(id, x, y, size, linewidth, init_delay, delay, splits) {
-    x += linewidth
-    y += linewidth
-    size -= (2*linewidth)
     var split = size/splits
     var midX, midY, clip
 
@@ -117,14 +126,15 @@ function render_pixel(id, x, y, size, linewidth, init_delay, delay, splits) {
 
 function parallel_animation() {
     
-    var size = 100+4
-    var linewidth = 8/2
-    var imgpath = "testimage3.jpg"
-    var x = 10
-    var y = 10
+    var linewidth = 6
+    var size = 80+linewidth
+    linewidth /= 2
+    var imgpath = "testimage5.jpg"
+    var x = 0
+    var y = 0
 
     var gridsize = 4
-    var gap = 15 
+    var gap = 3 
     var id = 0
     var d1, d2
 
@@ -154,6 +164,7 @@ function parallel_animation() {
 }
 
 parallel_animation()
+
 
 // d3.json("data.json", function(d) {
 // });
