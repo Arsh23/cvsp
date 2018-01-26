@@ -52,6 +52,12 @@ function init_pixel(id, x, y, size, linewidth, image, offsetX, offsetY, imgsize)
         .style('fill', 'none')
         .style('stroke', 'black')
     
+    pixel.append('path')
+        .attr('id', 'bgrect'+id)
+        .attr("d", clippath)
+        .style('fill', 'none')
+        .style('stroke', 'black')
+
     pixel.append("svg:image")
         .attr('id', 'bgimage'+id)
         .attr('x', x+offsetX)
@@ -60,7 +66,7 @@ function init_pixel(id, x, y, size, linewidth, image, offsetX, offsetY, imgsize)
         .attr('height', imgsize)
         .attr("xlink:href", image)
         .style('stroke', 'black')
-        .style('opacity', 0.20)
+        .style('opacity', 0.00)
         .style('filter', 'url(#bw-filter)')
         .attr("clip-path", 'url(#clipPathCrop' + id + ')')
 
@@ -83,16 +89,13 @@ function init_pixel(id, x, y, size, linewidth, image, offsetX, offsetY, imgsize)
         .attr('stroke-linecap', 'round')
         .attr('stroke-dasharray', length + ' ' + length)
         .attr('stroke-dashoffset', length)
-
-
 }
 
-function load_pixel(id, init_delay, delay) {
+function load_pixel(id, delay, d2, new_x, new_y, size, render_queue, sync, callback) {
     canvas.select('#path'+id)
         .transition()
         .ease(d3.easeLinear)
         .duration(delay)
-        .delay(init_delay)
         .attr('stroke-dashoffset', 0)
         .transition()
         .duration(0)
@@ -101,13 +104,22 @@ function load_pixel(id, init_delay, delay) {
         .transition()
         .duration(delay)
         .ease(d3.easeLinear)
-        .delay(init_delay)
         .style('opacity', 0.7)
+    canvas.select('#bgrect'+id)
+        .transition()
+        .duration(delay)
+        .ease(d3.easeLinear)
+        .style('opacity', 0)
+
+    setTimeout(function() {
+        if(sync == false) { render_queue.defer(render_pixel, id, new_x, new_y, size, d2) }
+        callback(null, 0)
+    }, delay)
 }
 
-function render_pixel(id, x, y, size, linewidth, init_delay, delay, splits) {
-    var split = size/splits
-    var midX, midY, clip
+function render_pixel(id, x, y, size, delay, callback) {
+    var split = size/10
+    var midX, midY, clip, init_delay = 0
 
     for(midY=0; midY<=size-split; midY+=split) {
         for(midX=split; midX<=size; midX+=split) {
@@ -121,50 +133,54 @@ function render_pixel(id, x, y, size, linewidth, init_delay, delay, splits) {
             init_delay += delay 
         }
     }
+    setTimeout(function() { callback(null, 0) }, init_delay-delay)
 }
 
 
-function parallel_animation() {
+function animate(id, x, y, load_c, render_c, sync=false) {
     
-    var linewidth = 6
-    var size = 80+linewidth
+    var linewidth = 4
+    var size = 60+linewidth
     linewidth /= 2
     var imgpath = "testimage5.jpg"
-    var x = 0
-    var y = 0
-
     var gridsize = 4
     var gap = 3 
-    var id = 0
-    var init_delay = 1000
-    var d1, d2
-
-
     var imgsize = size*gridsize
+
+    if(load_c == 0) { var load_queue = d3.queue() }
+    else { var load_queue = d3.queue(load_c) }
+
+    if(render_c == 0) { var render_queue = d3.queue() }
+    else { var render_queue = d3.queue(render_c) }
+
     for(var i=0; i<gridsize; i++) {
         for(var j=0; j<gridsize; j++) {
             id += 1
+            var new_x = x+(j*size + j*gap)
+            var new_y = y+(i*size + i*gap)
             init_pixel(
-                id, 
-                x+(j*size + j*gap), // x 
-                y+(i*size + i*gap), // y
-                size, 
-                linewidth, 
-                imgpath, 
-                -(j*size ), // offsetX
-                -(i*size ), // offsetY
-                imgsize
+                id, new_x, new_y, size, linewidth, imgpath, -(j*size), -(i*size), imgsize
             )
-            d1 = Math.floor(Math.random() * (4000 - 1500 + 1)) + 1500
-            d2 = Math.floor(Math.random() * (30 - 18 + 1)) + 18
-            load_pixel(id, init_delay, d1)
-            render_pixel(id, x+(j*size + j*gap), y+(i*size + i*gap), size, linewidth, d1+init_delay, d2, 10)
+            var d1 = Math.floor(Math.random() * (9000 - 1500 + 1)) + 1500
+            var d2 = Math.floor(Math.random() * (15 - 8 + 1)) + 8
+            load_queue.defer(
+                load_pixel, id, d1, d2, new_x, new_y, size, render_queue, sync
+            )
+            if(sync == true) {
+                load_queue.defer(render_pixel, id, new_x, new_y, size, d2)
+            }
         }
     }
 
 }
 
-parallel_animation()
+animate(100, 0, 0, 1, 1, true)
+
+animate(200, 300, 0, 8, 1, false)
+// animate(200, 300, 0, 0, 1, false)
+
+animate(300, 600, 0, 8, 8, false)
+// animate(300, 600, 0, 0, 0, false)
 
 
 // d3.json("data.json", function(d) {
