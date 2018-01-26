@@ -121,6 +121,7 @@ function render_pixel(id, x, y, size, linewidth, init_delay, delay, splits) {
             init_delay += delay 
         }
     }
+    return init_delay-delay
 }
 
 
@@ -139,6 +140,7 @@ function parallel_animation() {
     var init_delay = 1000
     var d1, d2
 
+    var queue = d3.queue(1)
 
     var imgsize = size*gridsize
     for(var i=0; i<gridsize; i++) {
@@ -155,10 +157,24 @@ function parallel_animation() {
                 -(i*size ), // offsetY
                 imgsize
             )
-            d1 = Math.floor(Math.random() * (4000 - 1500 + 1)) + 1500
-            d2 = Math.floor(Math.random() * (30 - 18 + 1)) + 18
+            d1 = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000
+            // d2 = Math.floor(Math.random() * (20 - 10 + 1)) + 10
             load_pixel(id, init_delay, d1)
-            render_pixel(id, x+(j*size + j*gap), y+(i*size + i*gap), size, linewidth, d1+init_delay, d2, 10)
+            // render_pixel(id, x+(j*size + j*gap), y+(i*size + i*gap), size, linewidth, d1+init_delay, d2, 10)
+            
+            setTimeout(function(id, x, y, i, j, size, gap, linewidth, d1, init_delay) {
+                // queue.push(id)
+                queue.defer(function(id, x, y, i, j, size, gap, linewidth, d1, init_delay, callback) {
+                    d2 = Math.floor(Math.random() * (20 - 10 + 1)) + 10
+                    render_delay = render_pixel(id, x+(j*size + j*gap), y+(i*size + i*gap), size, linewidth, 0, d2, 10)
+                    console.log(d2)
+                    setTimeout(function() {
+                        callback(null, 0)
+                        // console.log(id)
+                    }, render_delay)
+                }, id, x, y, i, j, size, gap, linewidth, d1, init_delay)
+                // console.log(id)
+            }, init_delay+d1, id, x, y, i, j, size, gap, linewidth, d1, init_delay)
         }
     }
 
