@@ -55,6 +55,7 @@ function init_pixel(id, x, y, size, linewidth, image, offsetX, offsetY, imgsize)
     pixel.append('path')
         .attr('id', 'bgrect'+id)
         .attr("d", clippath)
+        .style('opacity', 0.70)
         .style('fill', 'none')
         .style('stroke', 'black')
 
@@ -80,7 +81,7 @@ function init_pixel(id, x, y, size, linewidth, image, offsetX, offsetY, imgsize)
         .attr("clip-path", 'url(#clipPath' + id + ')')
 
     pixel.append("path")     
-        .style("stroke", "black")
+        .style("stroke", "#2d2d2d")
         .style('stroke-width', linewidth*2)
         .style("fill", "none")
         .attr('id', 'path'+id)
@@ -138,7 +139,6 @@ function render_pixel(id, x, y, size, delay, callback) {
 
 
 function animate(id, x, y, load_c, render_c, sync=false) {
-    
     var linewidth = 4
     var size = 60+linewidth
     linewidth /= 2
@@ -149,7 +149,6 @@ function animate(id, x, y, load_c, render_c, sync=false) {
 
     if(load_c == 0) { var load_queue = d3.queue() }
     else { var load_queue = d3.queue(load_c) }
-
     if(render_c == 0) { var render_queue = d3.queue() }
     else { var render_queue = d3.queue(render_c) }
 
@@ -161,7 +160,7 @@ function animate(id, x, y, load_c, render_c, sync=false) {
             init_pixel(
                 id, new_x, new_y, size, linewidth, imgpath, -(j*size), -(i*size), imgsize
             )
-            var d1 = Math.floor(Math.random() * (9000 - 1500 + 1)) + 1500
+            var d1 = Math.floor(Math.random() * (7000 - 1500 + 1)) + 1500
             var d2 = Math.floor(Math.random() * (15 - 8 + 1)) + 8
             load_queue.defer(
                 load_pixel, id, d1, d2, new_x, new_y, size, render_queue, sync
@@ -171,7 +170,6 @@ function animate(id, x, y, load_c, render_c, sync=false) {
             }
         }
     }
-
 }
 
 animate(100, 0, 0, 1, 1, true)
