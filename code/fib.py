@@ -1,6 +1,5 @@
 import time
 import asyncio
-import threading
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import ProcessPoolExecutor
 
